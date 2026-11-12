@@ -1,0 +1,18 @@
+{
+  "name": "9ja-vote",
+  "private": true,
+  "version": "0.1.0",
+  "description": "9ja Vote (Project Nigeria Vote) - election information, transparency and controlled demonstration platform. NOT an official INEC system.",
+  "workspaces": ["packages/*", "apps/api", "apps/admin", "apps/public-web", "apps/broadcast"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build:packages": "npm run build -w @9ja-vote/shared-types",
+    "build": "npm run build:packages && npm run build -w @9ja-vote/api -w @9ja-vote/public-web -w @9ja-vote/admin -w @9ja-vote/broadcast",
+    "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present",
+    "test": "npm run build:packages && npm run test --workspaces --if-present",
+    "dev:api": "npm run start:dev -w @9ja-vote/api",
+    "dev:public": "npm run dev -w @9ja-vote/public-web",
+    "dev:admin": "npm run dev -w @9ja-vote/admin",
+    "dev:broadcast": "npm run dev -w @9ja-vote/broadcast"
+  }
+}

@@ -1,0 +1,110 @@
+/* 9ja Vote design system — tokens + shared components.
+   System fonts only (no web-font downloads) to stay light on slow networks. */
+:root {
+  --green: #008751;          /* Nigerian green */
+  --emerald: #04492f;        /* deep emerald */
+  --emerald-900: #022c1d;
+  --mint: #e8f5ee;
+  --white: #ffffff;
+  --grey-100: #f3f5f4;
+  --grey-300: #d5dad7;
+  --grey-600: #5b6661;
+  --charcoal: #18211d;
+  --gold: #c8961e;
+  --danger: #b3261e;
+  --radius: 18px;
+  --shadow: 0 10px 30px rgba(2, 44, 29, 0.14);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--charcoal);
+  background: var(--grey-100);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { line-height: 1.15; margin: 0 0 0.5em; letter-spacing: -0.015em; }
+p { margin: 0 0 1em; }
+a { color: var(--green); }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+
+.container { width: min(1180px, 100% - 2.5rem); margin-inline: auto; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Aso Rock backdrop: fixed photo behind everything, tinted emerald. */
+.backdrop {
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(2, 44, 29, 0.55) 0%, rgba(2, 44, 29, 0.25) 40%, rgba(2, 44, 29, 0.8) 100%),
+    url("/images/aso-rock.jpg") center / cover no-repeat,
+    var(--emerald);
+}
+
+.demo-banner {
+  background: var(--charcoal); color: #fff; font-size: 0.85rem; text-align: center; padding: 0.5rem 1rem;
+}
+.demo-banner strong { color: #ffd77a; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  min-height: 52px; padding: 0 1.6rem; border-radius: 999px; border: 2px solid transparent;
+  font: inherit; font-weight: 700; text-decoration: none; cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary { background: var(--green); color: #fff; }
+.btn-primary:hover { background: #006b40; }
+.btn-ghost { background: rgba(255, 255, 255, 0.12); color: #fff; border-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(6px); }
+
+.card {
+  background: rgba(255, 255, 255, 0.94); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 1.5rem; backdrop-filter: blur(10px);
+}
+.card-dark { background: rgba(2, 44, 29, 0.78); color: #fff; border: 1px solid rgba(255, 255, 255, 0.14); }
+
+.eyebrow { text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.78rem; font-weight: 700; color: var(--green); }
+.card-dark .eyebrow, .on-dark .eyebrow { color: #8fe3b8; }
+.muted { color: var(--grey-600); }
+.card-dark .muted { color: #b9d6c8; }
+
+.badge {
+  display: inline-block; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.74rem; font-weight: 700;
+  background: var(--grey-300); color: var(--charcoal); white-space: nowrap;
+}
+.badge[data-status="VERIFIED"], .badge[data-status="OFFICIALLY_DECLARED"] { background: #cdeedd; color: #04492f; }
+.badge[data-status="UNDER_VERIFICATION"], .badge[data-status="RECEIVED"], .badge[data-status="SUBMITTED"] { background: #fdeec7; color: #6b4a00; }
+.badge[data-status="DISPUTED"] { background: #f9d5d2; color: #7d1a14; }
+.badge-demo { background: #ffd77a; color: #3d2c00; }
+
+/* Horizontal vote bars */
+.bars { display: grid; gap: 0.9rem; }
+.bar-row { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr auto; gap: 0.8rem; align-items: center; }
+.bar-track { height: 14px; border-radius: 999px; background: rgba(120, 130, 125, 0.22); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; transform-origin: left; animation: grow 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.bar-value { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
+@keyframes grow { from { transform: scaleX(0); } }
+
+/* Schematic tile map of the states */
+.tilemap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; max-width: 520px; }
+.tile {
+  aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center; color: #fff; font-weight: 800;
+  font-size: clamp(0.65rem, 1.6vw, 0.9rem); position: relative;
+}
+.tile[data-pending="true"] { background: repeating-linear-gradient(45deg, #9aa39f, #9aa39f 5px, #b4bbb8 5px, #b4bbb8 10px) !important; }
+.tile[data-status="DISPUTED"]::after { content: "!"; position: absolute; top: 2px; right: 5px; font-size: 0.7em; }
+
+.stat { font-size: clamp(1.6rem, 3.4vw, 2.4rem); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.dot { display: inline-block; width: 0.75em; height: 0.75em; border-radius: 50%; margin-right: 0.45em; vertical-align: baseline; }
+
+table.data { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+table.data th, table.data td { text-align: left; padding: 0.65rem 0.6rem; border-bottom: 1px solid var(--grey-300); }
+table.data th { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--grey-600); }
+table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

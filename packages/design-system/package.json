@@ -1,0 +1,6 @@
+{
+  "name": "@9ja-vote/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "files": ["styles.css", "tokens.json"]
+}
