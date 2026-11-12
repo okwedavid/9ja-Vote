@@ -1,0 +1,37 @@
+{
+  "name": "@9ja-vote/api",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@9ja-vote/shared-types": "^0.1.0",
+    "@nestjs/common": "^11.2.9",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.2.9",
+    "@nestjs/platform-express": "^11.2.9",
+    "@nestjs/swagger": "^11.4.8",
+    "@nestjs/throttler": "^6.4.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "helmet": "^8.3.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^11.2.9",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.20.5",
+    "@types/supertest": "^7.2.1",
+    "jest": "^29.7.0",
+    "supertest": "^7.3.2",
+    "ts-jest": "^29.4.15",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "start:dev": "tsc -p tsconfig.json --watch & node --watch dist/main.js",
+    "typecheck": "tsc -p tsconfig.spec.json",
+    "test": "jest"
+  }
+}
