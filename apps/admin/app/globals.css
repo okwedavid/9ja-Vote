@@ -1,0 +1,16 @@
+.shell { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 36px); }
+.side { background: linear-gradient(180deg, rgba(2, 44, 29, 0.93), rgba(2, 44, 29, 0.97)), url("/images/aso-rock.jpg") center / cover; color: #fff; padding: 1.5rem 1rem; }
+.side .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; font-size: 1.15rem; margin-bottom: 2rem; }
+.side nav { display: grid; gap: 0.25rem; }
+.side nav span { padding: 0.75rem 0.9rem; border-radius: 12px; color: #cfe6da; font-weight: 600; }
+.side nav span[aria-current="page"] { background: rgba(255, 255, 255, 0.14); color: #fff; }
+.side nav small { opacity: 0.6; font-weight: 400; }
+.content { padding: 2rem clamp(1rem, 3vw, 2.5rem); display: grid; gap: 1.4rem; align-content: start; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+.kpis .card p { margin: 0; }
+.kpis .stat { color: var(--emerald); }
+.matrix td.yes { color: var(--green); font-weight: 800; text-align: center; }
+.matrix td.no { color: var(--grey-300); text-align: center; }
+.matrix th.p { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; vertical-align: bottom; }
+.scroll { overflow-x: auto; }
+@media (max-width: 800px) { .shell { grid-template-columns: 1fr; } }

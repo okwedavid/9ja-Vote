@@ -1,0 +1,24 @@
+{
+  "name": "@9ja-vote/public-web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@9ja-vote/design-system": "^0.1.0",
+    "@9ja-vote/shared-types": "^0.1.0",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "typecheck": "tsc --noEmit"
+  }
+}
