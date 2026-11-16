@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/aso_rock_background.dart';
 import '../widgets/demo_banner.dart';
+import 'education_screen.dart';
+import 'elections_screen.dart';
+import 'parties_screen.dart';
+import 'polling_units_screen.dart';
+import 'results_screen.dart';
+import 'settings_screen.dart';
 
 class _Slide {
   const _Slide(this.asset, this.title);
@@ -43,6 +49,30 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _openModule(BuildContext context, int index) {
+    final route = switch (index) {
+      0 => MaterialPageRoute<void>(builder: (_) => const EducationScreen()),
+      1 => MaterialPageRoute<void>(builder: (_) => const ElectionsScreen()),
+      2 => MaterialPageRoute<void>(builder: (_) => const PartiesScreen()),
+      3 => MaterialPageRoute<void>(builder: (_) => const PartiesScreen()),
+      4 => MaterialPageRoute<void>(builder: (_) => const PollingUnitsScreen()),
+      5 => MaterialPageRoute<void>(builder: (_) => const ResultsScreen()),
+      7 => MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+      _ => null,
+    };
+    if (route == null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Identity verification demo is disabled: this app never collects biometric or identity data.'),
+          ),
+        );
+      return;
+    }
+    Navigator.of(context).push(route);
   }
 
   @override
@@ -99,7 +129,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisSpacing: 12,
                         childAspectRatio: 1.35,
                         children: [
-                          for (final (icon, label) in _modules) _ModuleTile(icon: icon, label: label),
+                          for (var i = 0; i < _modules.length; i++)
+                            _ModuleTile(
+                              icon: _modules[i].$1,
+                              label: _modules[i].$2,
+                              onTap: () => _openModule(context, i),
+                            ),
                         ],
                       ),
                     ),
@@ -154,9 +189,10 @@ class _SlideCard extends StatelessWidget {
 }
 
 class _ModuleTile extends StatelessWidget {
-  const _ModuleTile({required this.icon, required this.label});
+  const _ModuleTile({required this.icon, required this.label, required this.onTap});
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -165,9 +201,7 @@ class _ModuleTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        onTap: () => ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text('$label is planned for a later sprint day.'))),
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(

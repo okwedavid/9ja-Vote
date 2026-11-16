@@ -1,7 +1,25 @@
 # 9ja Vote mobile (Flutter)
 
-Status: **source scaffold, not yet compiled.** The build sandbox had no Flutter SDK, so this code has
-not been run through `flutter analyze` or `flutter test`. Expect to fix small issues on first run.
+Status: **source complete for the demo scope, not yet compiled.** The build sandbox had no Flutter SDK, so
+this code has not been run through `flutter analyze` or `flutter test`. Expect to fix small issues on first run.
+Release instructions (keystore, signing, Play/App Store) are in [`docs/mobile/shipping.md`](../../docs/mobile/shipping.md).
+
+## Screens
+
+| File | Screen |
+|---|---|
+| `lib/screens/welcome_screen.dart` | Welcome / entry |
+| `lib/screens/home_screen.dart` | Home: 3D Aso Rock slideshow + eight module tiles |
+| `lib/screens/education_screen.dart` | Voter education list + article detail |
+| `lib/screens/elections_screen.dart` | Election calendar (marked unconfirmed) |
+| `lib/screens/parties_screen.dart` | Fictional parties, candidates and manifesto pledges |
+| `lib/screens/results_screen.dart` | National demonstration figures, no winner declared |
+| `lib/screens/polling_units_screen.dart` | Synthetic polling-unit search |
+| `lib/screens/settings_screen.dart` | Alerts, large text, languages, privacy and limits |
+
+Content lives in `lib/data/demo_content.dart` and is bundled — the app makes no network calls and collects no
+personal data. The identity-verification tile is deliberately inert: no biometric or identity data is ever
+collected.
 
 ## Android Studio setup
 
