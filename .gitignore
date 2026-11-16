@@ -17,3 +17,11 @@ apps/mobile/.dart_tool/
 apps/mobile/build/
 apps/mobile/.flutter-plugins*
 apps/mobile/pubspec.lock
+
+# Local demonstration data store (never commit)
+**/.data/
+
+# Mobile signing material (never commit)
+**/key.properties
+**/*.jks
+**/*.keystore

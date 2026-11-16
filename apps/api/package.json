@@ -32,6 +32,7 @@
     "start": "node dist/main.js",
     "start:dev": "tsc -p tsconfig.json --watch & node --watch dist/main.js",
     "typecheck": "tsc -p tsconfig.spec.json",
-    "test": "jest"
+    "test": "jest",
+    "seed:admin": "tsc -p tsconfig.json && node dist/scripts/seed-admin.js"
   }
 }

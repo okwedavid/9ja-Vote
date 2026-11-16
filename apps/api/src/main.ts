@@ -13,7 +13,12 @@ async function bootstrap(): Promise<void> {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
 
   const origins = (process.env.CORS_ORIGINS ?? '').split(',').map((o) => o.trim()).filter(Boolean);
-  app.enableCors({ origin: origins.length ? origins : false, methods: ['GET'] });
+  app.enableCors({
+    origin: origins.length ? origins : false,
+    methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
 
   if (process.env.API_DOCS_ENABLED !== 'false') {
     const config = new DocumentBuilder()
