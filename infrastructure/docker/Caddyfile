@@ -1,0 +1,33 @@
+# Automatic HTTPS for the three public surfaces. Caddy obtains certificates itself.
+# Admin is deliberately protected with HTTP basic auth as a second gate: the
+# Command Centre still requires its own sign-in behind it.
+
+{$PUBLIC_DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+	}
+	reverse_proxy public-web:3000
+}
+
+{$ADMIN_DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Robots-Tag "noindex, nofollow"
+	}
+	reverse_proxy admin:3001
+}
+
+{$BROADCAST_DOMAIN} {
+	encode zstd gzip
+	header {
+		X-Robots-Tag "noindex, nofollow"
+	}
+	reverse_proxy broadcast:3002
+}

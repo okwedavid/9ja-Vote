@@ -1,0 +1,125 @@
+# Production-shaped stack: Postgres, Redis, the four services and Caddy for TLS.
+#   cp .env.production.example .env.production   # fill it in, never commit it
+#   docker compose --env-file .env.production -f infrastructure/docker/docker-compose.prod.yml up -d --build
+name: 9ja-vote
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?set in .env.production}
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env.production}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env.production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?set in .env.production}", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      API_PORT: 4000
+      API_DOCS_ENABLED: "false"
+      CORS_ORIGINS: ""
+      RATE_LIMIT_PER_MINUTE: "120"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set in .env.production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set in .env.production}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      DATA_STORE_PATH: /data/store.json
+      GIT_SHA: ${GIT_SHA:-local}
+      REAL_VOTING_ENABLED: "false"
+      INEC_RESULTS_INTEGRATION_ENABLED: "false"
+    volumes:
+      - apidata:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks: [internal]
+
+  public-web:
+    build:
+      context: ../..
+      dockerfile: apps/public-web/Dockerfile
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:4000
+    depends_on: [api]
+    networks: [internal]
+
+  admin:
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:4000
+    depends_on: [api]
+    networks: [internal]
+
+  broadcast:
+    build:
+      context: ../..
+      dockerfile: apps/broadcast/Dockerfile
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:4000
+    depends_on: [api]
+    networks: [internal]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?set in .env.production}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:?set in .env.production}
+      BROADCAST_DOMAIN: ${BROADCAST_DOMAIN:?set in .env.production}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [public-web, admin, broadcast]
+    networks: [internal]
+
+volumes:
+  pgdata:
+  redisdata:
+  apidata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge
