@@ -2,6 +2,7 @@
 import { RESULT_STATUS_LABEL, ResultsPayload, STATES } from '@9ja-vote/shared-types';
 import { useEffect, useState } from 'react';
 import { Emblem } from './Emblem';
+import { Ticker } from './Ticker';
 
 const fmt = new Intl.NumberFormat('en-NG');
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
@@ -98,6 +99,16 @@ export function Scoreboard({ initial }: { initial: ResultsPayload }) {
           <span>{stale ? 'CONNECTION LOST · showing last data' : 'No winner declared · only INEC declares results'}</span>
           <span><strong>{clock}</strong> WAT</span>
         </div>
+
+        <Ticker
+          lines={[
+            `${summary.statesReporting} of ${summary.statesTotal} states reporting`,
+            `${fmt.format(summary.totalValidVotes)} valid votes received`,
+            `${summary.statusBreakdown.UNDER_VERIFICATION} states under verification`,
+            `${summary.statusBreakdown.DISPUTED} disputed`,
+            'Synthetic demonstration data — not official results — no winner is declared by this platform',
+          ]}
+        />
       </div>
     </div>
   );
