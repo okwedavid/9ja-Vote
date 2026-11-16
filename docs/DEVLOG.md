@@ -33,7 +33,7 @@
   survive a restart. Postgres schema remains a draft and is still not wired.
 - Public site: 12 routes — calendar, party directory with manifesto pages, results explorer with LGA/ward
   drill-down, voter education with article pages, polling-unit search, help/FAQ/sources, accessibility, privacy.
-- Command Centre: real sign-in with HttpOnly cookie sessions, MFA setup, verification queue with role-aware
+- Command Centre: real sign-in (plain form post → `/api/session`, HttpOnly cookie, works without JavaScript), MFA setup, verification queue with role-aware
   actions, audit log, administrator management, election view, platform feature status, security settings.
 - Broadcast: ticker strip and a lower-third overlay mode (`?mode=lower-third`).
 - Mobile: six new screens (education, calendar, parties, results, polling units, settings) plus bundled demo

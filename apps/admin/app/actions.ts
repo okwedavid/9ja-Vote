@@ -20,32 +20,6 @@ function message(error: unknown): string {
   return 'Something went wrong';
 }
 
-export async function loginAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const email = String(formData.get('email') ?? '').trim();
-  const password = String(formData.get('password') ?? '');
-  const totp = String(formData.get('totp') ?? '').trim();
-  if (!email || !password) return { error: 'Enter your email and password.' };
-
-  try {
-    const result = await apiFetch<LoginResult>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, ...(totp ? { totp } : {}) }),
-    });
-    const store = await cookies();
-    store.set(SESSION_COOKIE, result.accessToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: result.expiresIn,
-    });
-  } catch (error) {
-    const text = message(error);
-    return { error: text.includes('MFA_REQUIRED') ? 'Enter the 6-digit code from your authenticator app.' : text };
-  }
-  redirect('/');
-}
-
 export async function logoutAction(): Promise<void> {
   const token = await getToken();
   if (token) {

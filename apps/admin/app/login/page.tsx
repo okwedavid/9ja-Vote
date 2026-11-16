@@ -5,8 +5,13 @@ import { getSession } from '../../lib/session';
 
 export const dynamic = 'force-dynamic';
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   if (await getSession()) redirect('/');
+  const { error } = await searchParams;
   return (
     <main className="login-wrap">
       <div className="login-card">
@@ -18,7 +23,7 @@ export default async function LoginPage() {
         <p className="muted-sm" style={{ marginTop: 0 }}>
           Demonstration environment. All figures are synthetic and no real voter data exists here.
         </p>
-        <LoginForm />
+        <LoginForm error={error} />
       </div>
     </main>
   );
