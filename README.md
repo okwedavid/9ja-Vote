@@ -13,14 +13,14 @@ An independent Nigerian election information, results-transparency and controlle
 
 | Path | What it is | State |
 |---|---|---|
-| `apps/public-web` | Next.js public site: Aso Rock backdrop, 3D slideshow, results demo | Builds and runs |
-| `apps/broadcast` | Next.js 1920x1080 TV scoreboard for OBS | Builds and runs |
-| `apps/admin` | Next.js Command Centre shell with the RBAC matrix | Builds and runs, no sign-in yet |
-| `apps/api` | NestJS read-only demo API with Swagger at `/docs` | Builds, runs, 10 tests pass |
-| `apps/mobile` | Flutter app source (welcome + home) | Written, **not yet compiled** |
+| `apps/public-web` | Next.js public site: Aso Rock backdrop, 3D slideshow, calendar, parties, voter education, polling units, results drill-down | Builds and runs |
+| `apps/broadcast` | Next.js 1920×1080 TV scoreboard, ticker and lower-third for OBS | Builds and runs |
+| `apps/admin` | Command Centre: real sign-in, TOTP MFA, verification queue, audit log, accounts, platform status | Builds and runs |
+| `apps/api` | NestJS API: results workflow, RBAC, audit trail, content, polling units, auth | Builds, runs, 23 tests pass |
+| `apps/mobile` | Flutter app: 8 module screens with bundled demo content | Written, **not yet compiled** |
 | `packages/shared-types` | Domain types, RBAC map, synthetic dataset | Builds |
 | `packages/design-system` | Colour tokens and shared CSS | In use by all web apps |
-| `infrastructure/` | Docker Compose (Postgres, Redis), SQL schema draft, deployment notes | Draft, not yet executed |
+| `infrastructure/` | Docker Compose (dev + production), Caddyfile, SQL schema draft, deployment notes | Dev compose runs; production stack untested here |
 | `docs/` | Legal checklist, owner checklist, API, testing, dev log | |
 
 Start with [ARCHITECTURE.md](ARCHITECTURE.md) and [SECURITY.md](SECURITY.md).
@@ -34,16 +34,29 @@ npm ci
 npm run build
 npm run start -w @9ja-vote/api          # http://localhost:4000/docs
 npm run start -w @9ja-vote/public-web   # http://localhost:3000
-npm run start -w @9ja-vote/admin        # http://localhost:3001
-npm run start -w @9ja-vote/broadcast    # http://localhost:3002  (add ?transparent=1 for an OBS overlay)
+npm run start -w @9ja-vote/admin        # http://localhost:3001  (sign-in required)
+npm run start -w @9ja-vote/broadcast    # http://localhost:3002  (?transparent=1 or ?mode=lower-third)
+
+# Create the first administrator — no default credentials exist anywhere
+npm run seed:admin -w @9ja-vote/api -- --email you@example.org --name "Your Name" --role SUPER_ADMINISTRATOR
 ```
 
-Checks: `npm run typecheck` and `npm test`.
+The seed script prints a generated password **once**. Put it in a password manager, sign in, and enable
+two-factor authentication in Security settings. `npm run seed:admin -- --list` shows who exists.
+
+Checks: `npm run typecheck` and `npm test` (23 API tests).
+
+Deployment: `docs/deployment/README.md` (Docker Compose + Caddy, with a pre-launch gate list).
+Mobile release: `docs/mobile/shipping.md`. Machine-readable task prompts: `docs/SPIN_UP_PROMPT.md`,
+`docs/OPENCODE_PROMPT.md`.
 
 Mobile: see [apps/mobile/README.md](apps/mobile/README.md) for Android Studio setup.
 
 Database (optional today, the API does not use it yet): copy `.env.example` to `.env`, set the Postgres and
 Redis passwords, then `docker compose --env-file .env -f infrastructure/docker/docker-compose.yml up -d`.
+
+The API keeps workflow state, accounts and the audit trail in `apps/api/.data/store.json` (git-ignored). Delete
+that file to reset the demonstration. Production replaces it with Postgres — see ARCHITECTURE.md §12.
 
 ## Images
 

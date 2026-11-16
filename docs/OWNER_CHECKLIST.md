@@ -20,5 +20,13 @@
 | 15 | Secrets manager for deployment credentials. Never send secrets in chat or commit them | Day 6 | Open |
 | 16 | A Mac with Xcode and an Apple Developer account for iOS builds | Day 7 | Open |
 | 17 | Native-speaker translators for Hausa, Yoruba, Igbo and Pidgin | Day 6 | Open |
+| 18 | Run `npm run seed:admin` on the server and store the generated password in a password manager | Deploy day | Open |
+| 19 | Enable TOTP MFA on every administrator account before sharing the admin URL | Deploy day | Open |
+| 20 | Approve the persistence decision: JSON store for the demo, then Drizzle + Postgres (ARCHITECTURE.md §12) | Day 3 | Open |
+| 21 | Google Play developer account (US$25 one-off) and an upload keystore, stored offline | Day 7 | Open |
+| 22 | Decide iOS scope (needs a Mac, Xcode and the US$99/year Apple developer programme) | Day 7 | Open |
+| 23 | Approve the public wording of every disclaimer, especially "not affiliated with INEC" | Before launch | Open |
+| 24 | Choose whether the broadcast graphics domain stays public or is restricted to the newsroom network | Before launch | Open |
+| 25 | Agree the incident contact and takedown process (who answers, within what time) | Before launch | Open |
 
 Nothing here assumes you already hold government approvals or access to official voter data.

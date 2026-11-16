@@ -124,15 +124,26 @@ Key rules:
 
 REST, JSON, `/api/v1`. See `docs/api/endpoints.md` for the implemented and planned endpoints.
 
-## 7. Authentication (Day 2 design)
+## 7. Authentication (implemented for administrators)
 
-- Passwords hashed with Argon2id. Email or SMS one-time code to confirm the account.
-- Short-lived access token (about 10 minutes) and a rotating refresh token stored hashed in `sessions`.
-  Reuse of a rotated token revokes the whole session family.
-- Mobile keeps tokens in the platform keystore. Web uses HttpOnly, Secure, SameSite cookies.
-- Device biometrics only unlock the stored session on that phone. They never prove identity or eligibility
-  to the server. PIN fallback for people who cannot use biometrics.
-- Administrators: TOTP MFA required, short sessions, new-device and unusual-location alerts.
+What runs today, in `apps/api/src/auth`:
+
+- Passwords hashed with **scrypt** (Node built-in, so no native module to compile). Policy: 12+ characters,
+  at least one letter and one number, no known-weak prefixes.
+- **HS256 tokens** signed with per-type secrets (access 30 min, refresh 7 days). If the operator has not set
+  `JWT_ACCESS_SECRET`/`JWT_REFRESH_SECRET`, the API generates ephemeral secrets and warns loudly — sessions then
+  end on restart. Secrets are never hardcoded.
+- Logout revokes the access token id. Five failed sign-ins lock the account for 15 minutes. Failed attempts are
+  audited without revealing whether the email exists.
+- **TOTP MFA** (RFC 6238) for administrators: `/auth/mfa/setup` returns a secret and `otpauth://` URL, and MFA
+  only switches on after a valid code. Nothing is stored until confirmed.
+- The Command Centre keeps the token in an **HttpOnly, SameSite=Lax cookie**; server actions call the API over
+  the internal network, so the browser never holds a token in JavaScript.
+- **No default accounts exist.** The first administrator is created by `npm run seed:admin`, which prints a
+  generated password once, or by another super administrator in the Command Centre.
+
+Still designed but not built: email/SMS verification and recovery, refresh-token rotation with reuse detection,
+session listing and revocation per device, new-device alerts, device-keystore storage in the mobile app.
 
 ## 8. Authorization (*role map implemented in `shared-types`, shown in the admin app*)
 
@@ -155,9 +166,11 @@ Notifications, Help } · Profile → { Accessibility, Privacy and security }.  (
 
 **Public web**: Home* (hero, slideshow, modules, results demo, trust) → Results by level → Parties → Candidates → Calendar → Education.
 
-**Admin**: Overview* → Elections → Parties and candidates (change requests) → Results verification → Administrators → Audit log → Alerts.
+**Admin**: Overview* → Results verification* (workflow actions) → Audit log* → Administrators* (create, suspend,
+change role) → Elections and calendar* → Platform status* → Security settings* (MFA, password).
 
-**Broadcast**: National scoreboard* → State comparison → Candidate lower-third (planned).
+**Broadcast**: National scoreboard with ticker* → Lower-third overlay (`?mode=lower-third`)*. State comparison
+is still planned.
 
 ## 10. Infrastructure and running cost (rough, to be re-quoted)
 
@@ -182,28 +195,52 @@ Google developer accounts, translation.
 5. **Ballot secrecy against a database administrator** needs real cryptography (blind signatures or similar) and
    expert review. The table separation here is a demonstration-level control.
 6. **Seven days**: enough for a working demonstration, not for certification.
-7. **Unverified parts of this scaffold**: Flutter code, the SQL migration, and visual browser testing.
+7. **Unverified parts**: the Flutter code has never been compiled; the SQL migration has never been run against
+   Postgres; no browser-rendering test has been done (HTTP checks only).
 8. **Map**: the state map is a schematic tile grid. A true geographic map needs licensed boundary data.
 
 ## 12. Decisions needing owner approval
 
-1. Database access layer: Drizzle ORM (recommended, plain SQL migrations) or TypeORM or Prisma.
+1. **Persistence**: the API currently uses a JSON document at `apps/api/.data/store.json` — fast to build,
+   fine for a demo, not a production database. Recommended next: Drizzle ORM over the existing SQL schema
+   (plain SQL migrations, explicit constraints), with repositories behind the current service interfaces.
 2. Keep NestJS 11 for now, or move to 12 with an ESM-capable test runner.
 3. npm workspaces (current) or pnpm + Turborepo.
 4. Product name: repository says 9ja Vote, brief says Nigeria Vote. The code uses 9ja Vote.
 5. Use real party names from INEC's published list (with source references) or keep fictional placeholders
    until INEC engagement. Placeholders are the cautious default.
-6. Hosting provider and region.
+6. Hosting provider and region (a single VPS with the Compose stack is the recommended default; see
+   `docs/deployment/README.md`).
 7. Keep the AI-generated Aso Rock image for the demo, or supply a licensed photograph now.
+8. Whether the public site may run without a sign-in wall in front of the Command Centre — it ships with both
+   the app's own sign-in and a Caddy reverse proxy, but admin exposure policy is an owner decision.
+9. Email and SMS providers (needed only when notifications leave the demo).
+10. Mobile distribution: Google Play only, or iOS as well (iOS needs a Mac and an Apple developer account).
 
 ## 13. Seven-day plan
 
 | Day | Work | Exit check |
 |---|---|---|
-| 1 | Architecture, monorepo, schema draft, scaffolds (this delivery) | Builds and tests pass |
-| 2 | Database layer, migrations, registration, login, sessions, profile | Auth tests pass |
-| 3 | Demo identity verification, eligibility demo, polling-unit info, voter education | Synthetic-only checks |
-| 4 | Parties, candidates, manifestos, calendar; admin change requests | Audit trail on every edit |
-| 5 | Results by level, Redis cache, admin verification flow, demo participation | Duplicate-attempt tests pass |
-| 6 | Security review, load, accessibility and poor-network tests | No critical findings in scope |
-| 7 | Android test build, deployment preparation, documentation, release review | Owner sign-off |
+| 1 | Architecture, monorepo, schema draft, scaffolds | Builds and tests pass ✅ |
+| 2 | Auth, RBAC, results workflow, audit trail, content, public pages, deployment stack | 23 tests pass ✅ |
+| 3 | Demo identity verification, eligibility demo, demo participation records | Synthetic-only checks |
+| 4 | Admin change requests (maker/checker) for parties and candidates | Audit trail on every edit |
+| 5 | Postgres-backed repositories, Redis cache, load test | Duplicate-attempt tests pass |
+| 6 | Security review, accessibility audit, poor-network tests | No critical findings in scope |
+| 7 | Android and iOS builds, production deployment, release review | Owner sign-off |
+
+
+## 14. Implementation status (Day 2)
+
+| Area | State | Notes |
+|---|---|---|
+| API | Live | 30+ routes, 23 tests, Swagger, throttling, classification header |
+| Auth and RBAC | Live | scrypt, HS256, TOTP, lockout, six roles enforced by guards |
+| Results workflow | Live | Seven statuses, server-side transition graph, append-only audit entries |
+| Persistence | Demo-grade | JSON store at `apps/api/.data/store.json`; Postgres schema drafted, not wired |
+| Public web | Live | 12 routes including calendar, parties, education, polling units, drill-down |
+| Command Centre | Live | Sign-in, MFA, queue, audit, accounts, platform status |
+| Broadcast | Live | Scoreboard, ticker, lower-third overlay |
+| Mobile | Written, uncompiled | 8 screens, bundled demo content, no network calls |
+| Deployment | Ready, untested | Dockerfiles ×4, Compose prod, Caddy TLS, runbook |
+| `packages/api-client`, `packages/configuration` | Deferred | Both apps have small typed fetch helpers instead; a shared client is only worth adding when the mobile app consumes the API |
