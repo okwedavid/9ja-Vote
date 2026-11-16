@@ -1,8 +1,9 @@
+import Link from 'next/link';
 import { Carousel3D, Slide } from '../components/Carousel3D';
 import { Countdown } from '../components/Countdown';
-import { Emblem } from '../components/Emblem';
 import { ResultsPanel } from '../components/ResultsPanel';
-import { en, LOCALES } from '../lib/i18n';
+import { SiteFooter, SiteHeader } from '../components/SiteChrome';
+import { en } from '../lib/i18n';
 import { getResults } from '../lib/results';
 
 export const dynamic = 'force-dynamic';
@@ -15,40 +16,22 @@ const slides: Slide[] = [
   { src: '/images/slide-gate.jpg', alt: 'Illustration of a city boulevard and gate at dusk', title: 'Built for every Nigerian', text: 'Large buttons, readable text and light pages for older phones and slow networks.' },
 ];
 
-const modules = [
-  ['Voter education', 'How accreditation and voting work at your polling unit.', 'Planned · Day 3'],
-  ['Election calendar', 'Key dates from INEC’s published timetable.', 'Planned · Day 4'],
-  ['Party directory', 'Every registered party, sourced from INEC publications.', 'Planned · Day 4'],
-  ['Candidates & manifestos', 'Election-specific candidate records with source references.', 'Planned · Day 4'],
-  ['Identity verification demo', 'Synthetic identities only. No real biometrics collected.', 'Planned · Day 3'],
-  ['Results transparency', 'Polling unit → ward → LGA → state → national.', 'Live demo below'],
-  ['Broadcast graphics', 'OBS-ready full-screen scoreboard for television.', 'Scaffolded'],
-  ['Command centre', 'Role-separated administration with audit trail.', 'Scaffolded'],
+const modules: Array<[string, string, string, string]> = [
+  ['Voter education', 'Short guides on registration, election day, collation and safety.', '/voter-education', 'Live'],
+  ['Election calendar', 'Phases and dates, clearly marked as unconfirmed.', '/elections', 'Live'],
+  ['Party directory', 'Five fictional placeholder parties, each with a source label.', '/parties', 'Live'],
+  ['Candidates & manifestos', 'Fictional candidates, pledges and verification state.', '/parties/dp-a', 'Live'],
+  ['Polling units', 'Synthetic units for every state, searchable by code.', '/polling-units', 'Live'],
+  ['Results transparency', 'National → state → LGA → ward drill-down.', '/results', 'Live'],
+  ['Broadcast graphics', 'OBS-ready 1920×1080 scoreboard for television.', '', 'Live · port 3002'],
+  ['Command centre', 'Role-separated administration with an append-only audit trail.', '', 'Live · port 3001'],
 ];
 
 export default async function Home() {
   const data = await getResults();
   return (
     <>
-      <header className="site-header on-dark">
-        <div className="container header-inner">
-          <a href="#main" className="brand"><Emblem /><span>9ja&nbsp;Vote</span></a>
-          <nav aria-label="Primary">
-            <a href="#highlights">Highlights</a>
-            <a href="#modules">Modules</a>
-            <a href="#results">Results demo</a>
-            <a href="#trust">Trust</a>
-          </nav>
-          <label className="lang">
-            <span className="sr-only">Language</span>
-            <select defaultValue="en" aria-label="Language">
-              {LOCALES.map((l) => (
-                <option key={l.code} value={l.code} disabled={!l.ready}>{l.label}{l.ready ? '' : ' (in translation)'}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main id="main">
         <section className="hero on-dark">
@@ -91,13 +74,21 @@ export default async function Home() {
               <p className="eyebrow">What we are building</p>
               <h2 className="section-title dark">One platform, three connected products</h2>
               <div className="module-grid">
-                {modules.map(([title, text, status]) => (
-                  <article key={title} className="module">
-                    <h3>{title}</h3>
-                    <p className="muted">{text}</p>
-                    <span className="badge">{status}</span>
-                  </article>
-                ))}
+                {modules.map(([title, text, href, status]) =>
+                  href ? (
+                    <Link key={title} href={href} className="module link-card">
+                      <h3>{title}</h3>
+                      <p className="muted">{text}</p>
+                      <span className="badge">{status}</span>
+                    </Link>
+                  ) : (
+                    <article key={title} className="module">
+                      <h3>{title}</h3>
+                      <p className="muted">{text}</p>
+                      <span className="badge">{status}</span>
+                    </article>
+                  ),
+                )}
               </div>
             </div>
           </div>
@@ -137,15 +128,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="site-footer on-dark">
-        <div className="container footer-inner">
-          <div className="brand"><Emblem size={36} /><span>9ja Vote</span></div>
-          <p>
-            Independent demonstration project. Not an INEC platform and not an authorised voting system.
-            The emblem is provisional and is not the Nigerian Coat of Arms. Photographs are AI-generated illustrations.
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
