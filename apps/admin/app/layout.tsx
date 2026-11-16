@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         <div className="demo-banner" role="note">
-          <strong>DEMONSTRATION</strong> · Command Centre scaffold. Sign-in is not implemented yet and no administrator accounts exist.
+          <strong>DEMONSTRATION</strong> · Command Centre. Synthetic data only, no voter records, and no role can see how anyone voted.
         </div>
         {children}
       </body>
